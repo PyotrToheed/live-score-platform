@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: oklch(0.585 0.233 255.4);
+  /* #2563eb */
+  --color-primary-foreground: oklch(0.985 0.001 106.4);
+  --color-secondary: oklch(0.967 0.003 264.5);
+}
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+
+@layer components {
+  .premium-card {
+    background-color: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+
+  .dark .premium-card {
+    background-color: var(--color-slate-800);
+    border-color: var(--color-slate-700);
+  }
+
+
+  .premium-card:hover {
+    box-shadow: var(--shadow-xl);
+    border-color: color-mix(in oklch, var(--color-blue-400), transparent 50%);
+    transform: translateY(-0.25rem);
+  }
+
+  .glass {
+    background-color: color-mix(in oklch, white, transparent 20%);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid color-mix(in oklch, white, transparent 80%);
+  }
+
+  .dark .glass {
+    background-color: color-mix(in oklch, var(--color-slate-900), transparent 20%);
+    border-bottom-color: color-mix(in oklch, white, transparent 90%);
+  }
+
+
+  .gradient-text {
+    background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(to right, var(--color-blue-600), var(--color-indigo-600));
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

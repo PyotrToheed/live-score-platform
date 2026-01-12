@@ -1,0 +1,177 @@
+﻿≡ƒÅü Seeding Client Feedback Milestone Data...
+Γ£à Persian language added
+Available languages: [ 'en', 'ar', 'fa' ]
+League data structure verified. Creating...
+node : FAILED TO CREATE LEAGUE:
+At line:1 char:1
++ node prisma/seed-feedback.js 2>&1 | Out-File -FilePath 
+seed-error.txt ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAILED TO CREATE LEAG 
+   UE::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+PrismaClientValidationError: 
+Invalid `prisma.league.create()` invocation in
+C:\Users\fu3ke\Desktop\Live Score and Prediction Sports 
+Platform\prisma\seed-feedback.js:60:45
+
+  57 console.log('League data structure verified. Creating...');
+  58 let persianLeague;
+  59 try {
+ΓåÆ 60     persianLeague = await prisma.league.create({
+           data: {
+             country: "Iran",
+             logoUrl: 
+"https://media.api-sports.io/football/leagues/290.png",
+             translations: {
+               create: [
+                 {
+                   languageCode: "en",
+                   name: "Persian Gulf Pro League",
+                   slug: "persian-gulf-pro-league-en",
+                   description: "The top tier of professional 
+football in Iran.",
+                   seo: {
+                     create: {
+                       title: "Persian Gulf Pro League",
+                       description: "The top tier of professional 
+football in Iran."
+                     }
+                   }
+                 },
+                 {
+                   languageCode: "ar",
+                   name: "╪»┘ê╪▒┘è ╪º┘ä╪«┘ä┘è╪¼ ╪º┘ä┘ü╪º╪▒╪│┘è",
+                   slug: "persian-gulf-pro-league-ar",
+                   description: "╪º┘ä╪»╪▒╪¼╪⌐ ╪º┘ä╪ú┘ê┘ä┘ë 
+┘ä┘â╪▒╪⌐ ╪º┘ä┘é╪»┘à ╪º┘ä╪º╪¡╪¬╪▒╪º┘ü┘è╪⌐ ┘ü┘è ╪Ñ┘è╪▒╪º┘å.",
+                   seo: {
+                     create: {
+                       title: "╪»┘ê╪▒┘è ╪º┘ä╪«┘ä┘è╪¼ 
+╪º┘ä┘ü╪º╪▒╪│┘è",
+                       description: "╪º┘ä╪»╪▒╪¼╪⌐ ╪º┘ä╪ú┘ê┘ä┘ë 
+┘ä┘â╪▒╪⌐ ╪º┘ä┘é╪»┘à ╪º┘ä╪º╪¡╪¬╪▒╪º┘ü┘è╪⌐ ┘ü┘è ╪Ñ┘è╪▒╪º┘å."
+                     }
+                   }
+                 },
+                 {
+                   languageCode: "fa",
+                   name: "┘ä█î┌» ╪¿╪▒╪¬╪▒ ╪«┘ä█î╪¼ ┘ü╪º╪▒╪│",
+                   slug: "persian-gulf-pro-league-fa",
+                   description: "╪¿╪º┘ä╪º╪¬╪▒█î┘å ╪│╪╖╪¡ 
+┘ü┘ê╪¬╪¿╪º┘ä ╪¡╪▒┘ü┘çΓÇî╪º█î ╪»╪▒ ╪º█î╪▒╪º┘å.",
+                   seo: {
+                     create: {
+                       title: "┘ä█î┌» ╪¿╪▒╪¬╪▒ ╪«┘ä█î╪¼ ┘ü╪º╪▒╪│",
+                       description: "╪¿╪º┘ä╪º╪¬╪▒█î┘å ╪│╪╖╪¡ 
+┘ü┘ê╪¬╪¿╪º┘ä ╪¡╪▒┘ü┘çΓÇî╪º█î ╪»╪▒ ╪º█î╪▒╪º┘å."
+                     }
+                   }
+                 }
+               ]
+             }
+           }
+         })
+
+Argument `language` is missing.
+    at wn (C:\Users\fu3ke\Desktop\Live Score and Prediction Sports 
+Platform\node_modules\@prisma\client\runtime\library.js:29:1363)
+    at qn.handleRequestError (C:\Users\fu3ke\Desktop\Live Score 
+and Prediction Sports 
+Platform\node_modules\@prisma\client\runtime\library.js:121:6958)
+    at qn.handleAndLogRequestError (C:\Users\fu3ke\Desktop\Live 
+Score and Prediction Sports 
+Platform\node_modules\@prisma\client\runtime\library.js:121:6640)
+    at qn.request (C:\Users\fu3ke\Desktop\Live Score and 
+Prediction Sports 
+Platform\node_modules\@prisma\client\runtime\library.js:121:6347)
+    at async l (C:\Users\fu3ke\Desktop\Live Score and Prediction 
+Sports 
+Platform\node_modules\@prisma\client\runtime\library.js:130:9616)
+    at async main (C:\Users\fu3ke\Desktop\Live Score and 
+Prediction Sports Platform\prisma\seed-feedback.js:60:25) {
+  clientVersion: '6.1.0'
+}
+PrismaClientValidationError: 
+Invalid `prisma.league.create()` invocation in
+C:\Users\fu3ke\Desktop\Live Score and Prediction Sports 
+Platform\prisma\seed-feedback.js:60:45
+
+  57 console.log('League data structure verified. Creating...');
+  58 let persianLeague;
+  59 try {
+ΓåÆ 60     persianLeague = await prisma.league.create({
+           data: {
+             country: "Iran",
+             logoUrl: 
+"https://media.api-sports.io/football/leagues/290.png",
+             translations: {
+               create: [
+                 {
+                   languageCode: "en",
+                   name: "Persian Gulf Pro League",
+                   slug: "persian-gulf-pro-league-en",
+                   description: "The top tier of professional 
+football in Iran.",
+                   seo: {
+                     create: {
+                       title: "Persian Gulf Pro League",
+                       description: "The top tier of professional 
+football in Iran."
+                     }
+                   }
+                 },
+                 {
+                   languageCode: "ar",
+                   name: "╪»┘ê╪▒┘è ╪º┘ä╪«┘ä┘è╪¼ ╪º┘ä┘ü╪º╪▒╪│┘è",
+                   slug: "persian-gulf-pro-league-ar",
+                   description: "╪º┘ä╪»╪▒╪¼╪⌐ ╪º┘ä╪ú┘ê┘ä┘ë 
+┘ä┘â╪▒╪⌐ ╪º┘ä┘é╪»┘à ╪º┘ä╪º╪¡╪¬╪▒╪º┘ü┘è╪⌐ ┘ü┘è ╪Ñ┘è╪▒╪º┘å.",
+                   seo: {
+                     create: {
+                       title: "╪»┘ê╪▒┘è ╪º┘ä╪«┘ä┘è╪¼ 
+╪º┘ä┘ü╪º╪▒╪│┘è",
+                       description: "╪º┘ä╪»╪▒╪¼╪⌐ ╪º┘ä╪ú┘ê┘ä┘ë 
+┘ä┘â╪▒╪⌐ ╪º┘ä┘é╪»┘à ╪º┘ä╪º╪¡╪¬╪▒╪º┘ü┘è╪⌐ ┘ü┘è ╪Ñ┘è╪▒╪º┘å."
+                     }
+                   }
+                 },
+                 {
+                   languageCode: "fa",
+                   name: "┘ä█î┌» ╪¿╪▒╪¬╪▒ ╪«┘ä█î╪¼ ┘ü╪º╪▒╪│",
+                   slug: "persian-gulf-pro-league-fa",
+                   description: "╪¿╪º┘ä╪º╪¬╪▒█î┘å ╪│╪╖╪¡ 
+┘ü┘ê╪¬╪¿╪º┘ä ╪¡╪▒┘ü┘çΓÇî╪º█î ╪»╪▒ ╪º█î╪▒╪º┘å.",
+                   seo: {
+                     create: {
+                       title: "┘ä█î┌» ╪¿╪▒╪¬╪▒ ╪«┘ä█î╪¼ ┘ü╪º╪▒╪│",
+                       description: "╪¿╪º┘ä╪º╪¬╪▒█î┘å ╪│╪╖╪¡ 
+┘ü┘ê╪¬╪¿╪º┘ä ╪¡╪▒┘ü┘çΓÇî╪º█î ╪»╪▒ ╪º█î╪▒╪º┘å."
+                     }
+                   }
+                 }
+               ]
+             }
+           }
+         })
+
+Argument `language` is missing.
+    at wn (C:\Users\fu3ke\Desktop\Live Score and Prediction Sports 
+Platform\node_modules\@prisma\client\runtime\library.js:29:1363)
+    at qn.handleRequestError (C:\Users\fu3ke\Desktop\Live Score 
+and Prediction Sports 
+Platform\node_modules\@prisma\client\runtime\library.js:121:6958)
+    at qn.handleAndLogRequestError (C:\Users\fu3ke\Desktop\Live 
+Score and Prediction Sports 
+Platform\node_modules\@prisma\client\runtime\library.js:121:6640)
+    at qn.request (C:\Users\fu3ke\Desktop\Live Score and 
+Prediction Sports 
+Platform\node_modules\@prisma\client\runtime\library.js:121:6347)
+    at async l (C:\Users\fu3ke\Desktop\Live Score and Prediction 
+Sports 
+Platform\node_modules\@prisma\client\runtime\library.js:130:9616)
+    at async main (C:\Users\fu3ke\Desktop\Live Score and 
+Prediction Sports Platform\prisma\seed-feedback.js:60:25) {
+  clientVersion: '6.1.0'
+}

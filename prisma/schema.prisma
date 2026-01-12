@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Language {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  code      String   @unique // e.g., 'en', 'es'
+  name      String
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leagueTranslations     LeagueTranslation[]
+  matchTranslations      MatchTranslation[]
+  predictionTranslations PredictionTranslation[]
+  articleTranslations    ArticleTranslation[]
+  bookmakerTranslations  BookmakerTranslation[]
+}
+
+model SeoFields {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  title          String?
+  description    String?
+  canonical      String?
+  ogTitle        String?
+  ogDescription  String?
+  ogImage        String?
+  noIndex        Boolean @default(false)
+
+  // One-to-one relations with other entities (at translation level)
+  leagueTranslation     LeagueTranslation?
+  matchTranslation      MatchTranslation?
+  articleTranslation    ArticleTranslation?
+}
+
+model League {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  country   String
+  logoUrl   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  matches      Match[]
+  translations LeagueTranslation[]
+}
+
+model LeagueTranslation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  leagueId    String   @db.ObjectId
+  languageCode String
+  slug        String   @unique
+  name        String
+  description String?
+
+  league    League    @relation(fields: [leagueId], references: [id])
+  language  Language  @relation(fields: [languageCode], references: [code])
+  
+  seoId     String    @unique @db.ObjectId
+  seo       SeoFields @relation(fields: [seoId], references: [id])
+
+  @@unique([leagueId, languageCode])
+}
+
+model Match {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  date        DateTime
+  homeTeam    String
+  awayTeam    String
+  homeScore   Int?
+  awayScore   Int?
+  leagueId    String   @db.ObjectId
+  status      String   @default("SCHEDULED")
+  
+  // New fields for Milestone 2
+  lineups     String? // JSON string
+  stats       String? // JSON string
+  homeTeamLogo String? // Cloudinary URL
+  awayTeamLogo String? // Cloudinary URL
+  
+  // Betting-focused fields for Milestone 4
+  mainTip       String? // e.g. "Home Win", "Over 2.5"
+  confidence    Int?    // 1-100 score
+  isFeatured    Boolean @default(false)
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  league    League    @relation(fields: [leagueId], references: [id])
+
+  
+  prediction   Prediction?
+  translations MatchTranslation[]
+}
+
+model MatchTranslation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  matchId     String   @db.ObjectId
+  languageCode String
+  slug        String   @unique
+  name        String // e.g. "Man Utd vs Liverpool"
+  content     String? // Pre-match or post-match summary
+  analysis    String? // Strategic analysis from expert
+
+  match     Match     @relation(fields: [matchId], references: [id])
+  language  Language  @relation(fields: [languageCode], references: [code])
+  
+  seoId     String    @unique @db.ObjectId
+  seo       SeoFields @relation(fields: [seoId], references: [id])
+
+  @@unique([matchId, languageCode])
+}
+
+model Prediction {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  matchId        String   @unique @db.ObjectId
+  winProbHome    Float
+  winProbAway    Float
+  winProbDraw    Float
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  match        Match       @relation(fields: [matchId], references: [id])
+  translations PredictionTranslation[]
+}
+
+model PredictionTranslation {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  predictionId   String   @db.ObjectId
+  languageCode   String
+  analysis       String // Text content
+
+  prediction Prediction @relation(fields: [predictionId], references: [id])
+  language   Language   @relation(fields: [languageCode], references: [code])
+
+  @@unique([predictionId, languageCode])
+}
+
+model Article {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  category      String
+  published     Boolean  @default(false)
+  featuredImage String?  // Cloudinary URL
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  translations ArticleTranslation[]
+}
+
+model ArticleTranslation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  articleId   String   @db.ObjectId
+  languageCode String
+  slug        String   @unique
+  title       String
+  content     String   // Text content
+  excerpt     String?
+
+  article   Article   @relation(fields: [articleId], references: [id])
+  language  Language  @relation(fields: [languageCode], references: [code])
+  
+  seoId     String    @unique @db.ObjectId
+  seo       SeoFields @relation(fields: [seoId], references: [id])
+
+  @@unique([articleId, languageCode])
+}
+
+model AdminUser {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Bookmaker {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  logoUrl     String?  // Cloudinary URL
+  rating      Float    @default(5.0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  translations BookmakerTranslation[]
+}
+
+model BookmakerTranslation {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  bookmakerId  String   @db.ObjectId
+  languageCode String
+  name         String
+  bonusText    String
+  affiliateUrl String
+
+  bookmaker Bookmaker @relation(fields: [bookmakerId], references: [id])
+  language  Language  @relation(fields: [languageCode], references: [code])
+
+  @@unique([bookmakerId, languageCode])
+}
+
