@@ -124,8 +124,8 @@ export async function syncFixtures(sportKey: string = SOCCER_SPORTS.EPL): Promis
                         if (!existingTrans) {
                             await prisma.matchTranslation.create({
                                 data: {
-                                    matchId: existingMatch.id,
-                                    languageCode: lang.code,
+                                    match: { connect: { id: existingMatch.id } },
+                                    language: { connect: { code: lang.code } },
                                     name: `${event.home_team} vs ${event.away_team}`,
                                     slug: `${event.home_team.toLowerCase().replace(/\s+/g, '-')}-vs-${event.away_team.toLowerCase().replace(/\s+/g, '-')}-${lang.code}-${Date.now()}`,
                                     seo: {
