@@ -74,10 +74,15 @@ export default async function MatchPage({ params }: { params: Promise<{ lang: st
 
     if (!finalTrans) notFound();
 
-    const leagueTrans = (await prisma.leagueTranslation.findUnique({
+    let leagueName = leagueSlug;
+    const leagueTransData = await prisma.leagueTranslation.findUnique({
         where: { slug: leagueSlug },
         select: { name: true }
-    })) || { name: leagueSlug };
+    });
+
+    if (leagueTransData && leagueTransData.name) {
+        leagueName = leagueTransData.name;
+    }
 
     const match = finalTrans.match;
     const prediction = match.prediction;
@@ -103,7 +108,7 @@ export default async function MatchPage({ params }: { params: Promise<{ lang: st
             <nav className="text-sm text-slate-500 mb-6">
                 <Link href={`/${lang}`} className="hover:text-primary dark:hover:text-blue-400">{t.nav.home}</Link>
                 <span className="mx-2">/</span>
-                <Link href={`/${lang}/league/${leagueSlug}`} className="hover:text-primary dark:hover:text-blue-400">{leagueTrans.name}</Link>
+                <Link href={`/${lang}/league/${leagueSlug}`} className="hover:text-primary dark:hover:text-blue-400">{leagueName}</Link>
                 <span className="mx-2">/</span>
                 <span className="font-medium text-slate-900 dark:text-white line-clamp-1 inline-block max-w-[200px] align-bottom">{finalTrans.name}</span>
             </nav>
