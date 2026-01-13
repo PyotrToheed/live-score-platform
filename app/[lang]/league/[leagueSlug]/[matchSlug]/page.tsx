@@ -74,10 +74,10 @@ export default async function MatchPage({ params }: { params: Promise<{ lang: st
 
     if (!finalTrans) notFound();
 
-    const leagueTrans = await prisma.leagueTranslation.findUnique({
+    const leagueTrans = (await prisma.leagueTranslation.findUnique({
         where: { slug: leagueSlug },
         select: { name: true }
-    });
+    })) || { name: leagueSlug };
 
     const match = finalTrans.match;
     const prediction = match.prediction;
