@@ -4,16 +4,32 @@ import Image from "next/image";
 import Link from "next/link";
 import { getDictionary } from "@/lib/i18n";
 import { generatePageMetadata } from "@/lib/seo";
+import { apiSports } from "@/lib/sports-api";
+import LeagueStandings from "@/components/LeagueStandings";
+
+function getApiSportsId(slug: string): number {
+    const map: Record<string, number> = {
+        'epl-en': 39,
+        'la-liga': 140,
+        'serie-a-en': 135,
+        'bundesliga-en': 78,
+        'ligue-1-en': 61,
+        'cl-en': 2,
+    };
+    return map[slug] || 0;
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string, leagueSlug: string }> }) {
     const { leagueSlug } = await params;
+    if (!prisma) return {};
+
     const leagueTrans = await prisma.leagueTranslation.findUnique({
         where: { slug: leagueSlug },
         include: { seo: true }
     });
 
-    if (!leagueTrans) return {};
-    return generatePageMetadata(leagueTrans.seo);
+    if (!leagueTrans || !leagueTrans.seo) return {};
+    return await generatePageMetadata(leagueTrans.seo);
 }
 
 export default async function LeaguePage({ params }: { params: Promise<{ lang: string, leagueSlug: string }> }) {
@@ -30,6 +46,8 @@ export default async function LeaguePage({ params }: { params: Promise<{ lang: s
         return tip;
     };
 
+    if (!prisma) return notFound();
+
     const leagueTrans = await prisma.leagueTranslation.findUnique({
         where: { slug: leagueSlug },
         include: {
@@ -37,6 +55,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ lang: s
                 include: {
                     matches: {
                         where: {
+                            date: { gte: new Date() },
                             translations: {
                                 some: { languageCode: lang }
                             }
@@ -52,7 +71,18 @@ export default async function LeaguePage({ params }: { params: Promise<{ lang: s
         }
     });
 
-    if (!leagueTrans) notFound();
+    if (!leagueTrans) return notFound();
+
+    // Fetch Real Standings
+    const apiId = getApiSportsId(leagueSlug);
+    let standings: any[] = [];
+    if (apiId > 0) {
+        try {
+            standings = await apiSports.getStandings(apiId.toString());
+        } catch (err) {
+            console.error("Failed to fetch standings:", err);
+        }
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -88,62 +118,8 @@ export default async function LeaguePage({ params }: { params: Promise<{ lang: s
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <div className="lg:col-span-2 space-y-12">
-                    {/* Mock Standings (Visual Only) */}
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-                        <div className="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-                            <h2 className="font-bold text-slate-900 dark:text-white">{t.ui.leagueStandings}</h2>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-100 px-3 py-1 rounded-full animate-pulse">{t.ui.liveTable}</span>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-start ltr:text-left rtl:text-right">
-                                <thead className="text-[10px] uppercase bg-slate-50 dark:bg-slate-900/50 text-slate-500 font-black tracking-wider">
-                                    <tr>
-                                        <th className="px-6 py-4 text-center">{t.ui.tablePos}</th>
-                                        <th className="px-6 py-4">{t.ui.tableTeam}</th>
-                                        <th className="px-4 py-4 text-center">{t.ui.tableMP}</th>
-                                        <th className="px-4 py-4 text-center">{t.ui.tableW}</th>
-                                        <th className="px-4 py-4 text-center">{t.ui.tableD}</th>
-                                        <th className="px-4 py-4 text-center">{t.ui.tableL}</th>
-                                        <th className="px-4 py-4 text-center">{t.ui.tablePts}</th>
-                                        <th className="px-6 py-4 text-center hidden sm:table-cell">{t.ui.tableForm}</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                                    {[
-                                        { p: 1, t: 'Arsenal', mp: 24, w: 18, d: 4, l: 2, pts: 58, f: ['w', 'w', 'w', 'd', 'w'] },
-                                        { p: 2, t: 'Man City', mp: 23, w: 17, d: 4, l: 2, pts: 55, f: ['w', 'w', 'l', 'w', 'w'] },
-                                        { p: 3, t: 'Liverpool', mp: 24, w: 15, d: 7, l: 2, pts: 52, f: ['d', 'w', 'w', 'w', 'd'] },
-                                        { p: 4, t: 'Aston Villa', mp: 24, w: 14, d: 4, l: 6, pts: 46, f: ['l', 'w', 'w', 'l', 'w'] },
-                                        { p: 5, t: 'Tottenham', mp: 24, w: 13, d: 5, l: 6, pts: 44, f: ['w', 'd', 'l', 'w', 'd'] },
-                                    ].map((row) => (
-                                        <tr key={row.p} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-                                            <td className={`px-6 py-4 text-center font-black ${row.p <= 4 ? 'text-blue-600 border-l-4 border-blue-600' : 'text-slate-400 border-l-4 border-transparent'}`}>{row.p}</td>
-                                            <td className="px-6 py-4 font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-black text-white ${['bg-red-600', 'bg-sky-400', 'bg-red-700', 'bg-purple-800', 'bg-slate-900'][row.p - 1]}`}>
-                                                    {row.t.substring(0, 1)}
-                                                </div>
-                                                {row.t}
-                                            </td>
-                                            <td className="px-4 py-4 text-center text-slate-500">{row.mp}</td>
-                                            <td className="px-4 py-4 text-center text-slate-500">{row.w}</td>
-                                            <td className="px-4 py-4 text-center text-slate-500">{row.d}</td>
-                                            <td className="px-4 py-4 text-center text-slate-500">{row.l}</td>
-                                            <td className="px-4 py-4 text-center font-black text-slate-900 dark:text-white">{row.pts}</td>
-                                            <td className="px-6 py-4 text-center hidden sm:flex gap-1 justify-center">
-                                                {row.f.map((r, i) => (
-                                                    <span key={i} className={`w-5 h-5 rounded-md flex items-center justify-center text-[8px] font-black uppercase text-white ${r === 'w' ? 'bg-green-500' : r === 'd' ? 'bg-slate-400' : 'bg-red-500'
-                                                        }`}>{r}</span>
-                                                ))}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            <div className="p-4 text-center bg-slate-50 dark:bg-slate-900/30 border-t border-slate-100 dark:border-slate-700">
-                                <button className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors">{t.ui.viewFullTable}</button>
-                            </div>
-                        </div>
-                    </div>
+                    {/* League Standings (Real Data) */}
+                    {standings.length > 0 && <LeagueStandings standings={standings} t={t} />}
 
                     {/* Upcoming Matches Card */}
                     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">

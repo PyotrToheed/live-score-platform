@@ -8,6 +8,8 @@ import PredictionChart from "@/components/PredictionChart";
 import { getDictionary } from "@/lib/i18n";
 import ShareButtons from "@/components/ShareButtons";
 import OddsDisplay from "@/components/OddsDisplay";
+import LiveMatchHeader from "@/components/LiveMatchHeader";
+import NotifyButton from "@/components/NotifyButton";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string, leagueSlug: string, matchSlug: string }> }) {
     const { lang, matchSlug } = await params;
@@ -115,58 +117,23 @@ export default async function MatchPage({ params }: { params: Promise<{ lang: st
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <div className="lg:col-span-2 space-y-12">
-                    {/* Scoreboard */}
-                    <div className="premium-card p-12 bg-slate-900 text-white overflow-hidden relative border-b-8 border-blue-600">
-                        <div className="absolute top-0 end-0 w-96 h-96 bg-blue-600/10 blur-[120px] -me-48 -mt-48 rounded-full" />
-                        <div className="relative z-10 flex items-center justify-between gap-8 text-center">
-                            <div className="flex-1 space-y-4">
-                                <div className="w-20 h-20 bg-white/5 rounded-3xl mx-auto flex items-center justify-center text-3xl font-black border border-white/10 relative overflow-hidden group">
-                                    {match.homeTeamLogo ? (
-                                        <Image
-                                            src={match.homeTeamLogo}
-                                            alt={match.homeTeam}
-                                            fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                        />
-                                    ) : (
-                                        match.homeTeam.substring(0, 1)
-                                    )}
-                                </div>
-                                <h1 className="text-2xl font-black tracking-tighter uppercase">{match.homeTeam}</h1>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex flex-col items-center">
-                                    <div className="px-3 py-1 bg-red-600 rounded-full text-[8px] font-black uppercase tracking-widest animate-pulse mb-4">
-                                        {t.ui.live}
-                                    </div>
-                                    <div className="text-7xl font-black tracking-tighter tabular-nums flex items-center justify-center gap-6">
-                                        <span className="text-blue-500">{match.homeScore ?? '0'}</span>
-                                        <span className="text-2xl opacity-20 italic">VS</span>
-                                        <span className="text-blue-500">{match.awayScore ?? '0'}</span>
-                                    </div>
-                                </div>
-                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
-                                    {new Date(match.date).toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' })} • {new Date(match.date).toLocaleDateString(lang, { day: '2-digit', month: 'short' })}
-                                </div>
-                            </div>
-                            <div className="flex-1 space-y-4">
-                                <div className="w-20 h-20 bg-white/5 rounded-3xl mx-auto flex items-center justify-center text-3xl font-black border border-white/10 relative overflow-hidden group">
-                                    {match.awayTeamLogo ? (
-                                        <Image
-                                            src={match.awayTeamLogo}
-                                            alt={match.awayTeam}
-                                            fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                        />
-                                    ) : (
-                                        match.awayTeam.substring(0, 1)
-                                    )}
-                                </div>
-                                <h1 className="text-2xl font-black tracking-tighter uppercase">{match.awayTeam}</h1>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Live Scoreboard */}
+                    <LiveMatchHeader
+                        matchId={match.id}
+                        initialData={{
+                            status: match.status,
+                            homeScore: match.homeScore,
+                            awayScore: match.awayScore,
+                            minute: match.minute,
+                            date: match.date,
+                            homeTeam: match.homeTeam,
+                            awayTeam: match.awayTeam,
+                            homeTeamLogo: match.homeTeamLogo,
+                            awayTeamLogo: match.awayTeamLogo
+                        }}
+                        lang={lang}
+                        t={t}
+                    />
 
                     {/* Expert Tip Box (Critical Milestone 4 Demand) */}
                     <div className="bg-blue-600 rounded-[2.5rem] p-1 shadow-2xl shadow-blue-500/30">
@@ -313,7 +280,7 @@ export default async function MatchPage({ params }: { params: Promise<{ lang: st
                             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                         </div>
                         <h4 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white mb-2">{t.ui.liveAlerts}</h4>
-                        <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-500/20">{t.ui.notifyMe}</button>
+                        <NotifyButton label={t.ui.notifyMe} />
                     </div>
 
                     <div className="premium-card p-6 bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700">

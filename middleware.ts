@@ -9,26 +9,37 @@ export default withAuth(
     function middleware(request: NextRequest) {
         const { pathname } = request.nextUrl;
 
-        // Skip static files and API routes (except those we want to handle)
+        // 1. Skip static assets, internal files, and API routes
         if (
             pathname.startsWith("/_next") ||
             pathname.includes(".") ||
             pathname.startsWith("/api") ||
-            pathname.startsWith("/admin") // Admin matches will be handled by withAuth but we skip i18n redirect for them
+            pathname.startsWith("/admin") ||
+            pathname === "/favicon.ico" ||
+            pathname === "/robots.txt" ||
+            pathname === "/sitemap.xml"
         ) {
             return;
         }
 
-        // Check if the current pathname has a supported locale
+        // 2. Language Guardrail: Check if the current pathname has a supported locale
+        // In a production environment with dynamic languages, this list would be 
+        // synchronized with the database or cached in a global variable.
         const pathnameHasLocale = locales.some(
             (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
         );
 
-        if (pathnameHasLocale) return;
+        if (pathnameHasLocale) {
+            // Further guardrail: If the locale exists but is "hidden" in database, 
+            // you would redirect to defaultLocale here.
+            return;
+        }
 
-        // Redirect if there is no locale
-        request.nextUrl.pathname = `/${defaultLocale}${pathname}`;
-        return NextResponse.redirect(request.nextUrl);
+        // 3. Redirect if there is no locale
+        // We use a permanent or temporary redirect based on requirements
+        const url = request.nextUrl.clone();
+        url.pathname = `/${defaultLocale}${pathname}`;
+        return NextResponse.redirect(url);
     },
     {
         callbacks: {

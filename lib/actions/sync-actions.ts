@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/db";
 import { oddsApi, SOCCER_SPORTS, Event, OddsEvent } from "@/lib/odds-api";
+import { apiSports } from "@/lib/sports-api";
 import { revalidatePath } from "next/cache";
 
 interface SyncResult {
@@ -77,6 +78,21 @@ export async function syncFixtures(sportKey: string = SOCCER_SPORTS.EPL): Promis
             result.errors.push('Could not fetch odds data');
         }
 
+        // Fetch API-Sports fixtures for logo enrichment
+        const apiSportsLeagueId = getApiSportsLeagueId(sportKey);
+        let apiSportsFixtures: any[] = [];
+        if (apiSportsLeagueId) {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                apiSportsFixtures = await apiSports.getLiveScores({
+                    league: apiSportsLeagueId.toString(),
+                    season: '2025'
+                });
+            } catch (err) {
+                console.error(`[Sync] Failed to fetch logos for ${sportKey}:`, err);
+            }
+        }
+
         // Process each event
         for (const event of events) {
             try {
@@ -97,7 +113,9 @@ export async function syncFixtures(sportKey: string = SOCCER_SPORTS.EPL): Promis
                 const h2hOdds = extractH2HOdds(eventOdds);
 
                 if (existingMatch) {
-                    // Update existing match with latest odds
+                    // Update existing match with latest odds and logos if missing
+                    const apiMatch = apiSportsFixtures.find(f => isMatch(f.teams.home.name, event.home_team) && isMatch(f.teams.away.name, event.away_team));
+
                     if (h2hOdds) {
                         await prisma.prediction.upsert({
                             where: { matchId: existingMatch.id },
@@ -111,6 +129,18 @@ export async function syncFixtures(sportKey: string = SOCCER_SPORTS.EPL): Promis
                                 winProbHome: h2hOdds.home,
                                 winProbDraw: h2hOdds.draw,
                                 winProbAway: h2hOdds.away,
+                            }
+                        });
+                    }
+
+                    // Update logos if not present
+                    if (apiMatch && (!existingMatch.homeTeamLogo || !existingMatch.awayTeamLogo)) {
+                        await prisma.match.update({
+                            where: { id: existingMatch.id },
+                            data: {
+                                homeTeamLogo: apiMatch.teams.home.logo,
+                                awayTeamLogo: apiMatch.teams.away.logo,
+                                apiSportsId: apiMatch.fixture.id.toString()
                             }
                         });
                     }
@@ -140,13 +170,18 @@ export async function syncFixtures(sportKey: string = SOCCER_SPORTS.EPL): Promis
                     }
                     result.updated++;
                 } else {
-                    // Create new match
+                    // Create new match with logos
+                    const apiMatch = apiSportsFixtures.find(f => isMatch(f.teams.home.name, event.home_team) && isMatch(f.teams.away.name, event.away_team));
+
                     const newMatch = await prisma.match.create({
                         data: {
                             date: new Date(event.commence_time),
                             homeTeam: event.home_team,
                             awayTeam: event.away_team,
                             leagueId: league.id,
+                            homeTeamLogo: apiMatch?.teams.home.logo,
+                            awayTeamLogo: apiMatch?.teams.away.logo,
+                            apiSportsId: apiMatch?.fixture.id.toString(),
                             status: 'SCHEDULED',
                             mainTip: h2hOdds ? getBestTip(h2hOdds) : null,
                             confidence: h2hOdds ? calculateConfidence(h2hOdds) : null,
@@ -190,6 +225,104 @@ export async function syncFixtures(sportKey: string = SOCCER_SPORTS.EPL): Promis
     return result;
 }
 
+/**
+ * Sync live scores from API-Sports
+ */
+const normalizeName = (name: string) => {
+    return name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^a-z0-9]/g, ' ')      // Replace non-alphanumeric with spaces
+        .trim()
+        .replace(/\s+/g, ' ');           // Collapse multiple spaces
+};
+
+const isMatch = (name1: string, name2: string) => {
+    const n1 = normalizeName(name1);
+    const n2 = normalizeName(name2);
+    return n1.includes(n2) || n2.includes(n1);
+};
+
+export async function syncLiveScores(): Promise<SyncResult> {
+    const result: SyncResult = {
+        success: false,
+        created: 0,
+        updated: 0,
+        errors: [],
+    };
+
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const liveFixtures = await apiSports.getLiveScores({
+            date: today,
+            season: '2025'
+        });
+
+        const dbMatches = await prisma.match.findMany({
+            where: {
+                status: { in: ['SCHEDULED', 'LIVE'] }
+            }
+        });
+
+        for (const fixture of liveFixtures) {
+            try {
+                const homeName = fixture.teams.home.name;
+                const awayName = fixture.teams.away.name;
+
+                // Use robust matching
+                const match = dbMatches.find(m =>
+                    isMatch(m.homeTeam, homeName) && isMatch(m.awayTeam, awayName)
+                );
+
+                if (match) {
+                    await prisma.match.update({
+                        where: { id: match.id },
+                        data: {
+                            status: mapApiSportsStatus(fixture.fixture.status.short),
+                            homeScore: fixture.goals.home,
+                            awayScore: fixture.goals.away,
+                            minute: fixture.fixture.status.elapsed,
+                            apiSportsId: fixture.fixture.id.toString(), // Link it for next time!
+                            homeTeamLogo: fixture.teams.home.logo,
+                            awayTeamLogo: fixture.teams.away.logo
+                        }
+                    });
+                    result.updated++;
+                }
+            } catch (err: any) {
+                result.errors.push(`Error syncing live fixture ${fixture.teams.home.name}: ${err.message}`);
+            }
+        }
+
+        result.success = true;
+        revalidatePath('/[lang]', 'layout');
+    } catch (error: any) {
+        result.errors.push(`Live sync failed: ${error.message}`);
+    }
+
+    return result;
+}
+
+function mapApiSportsStatus(short: string): any {
+    const map: Record<string, string> = {
+        'TBD': 'SCHEDULED',
+        'NS': 'SCHEDULED',
+        '1H': 'LIVE',
+        'HT': 'LIVE',
+        '2H': 'LIVE',
+        'ET': 'LIVE',
+        'P': 'LIVE',
+        'FT': 'FINISHED',
+        'AET': 'FINISHED',
+        'PEN': 'FINISHED',
+        'PST': 'POSTPONED',
+        'CANC': 'POSTPONED',
+        'ABD': 'POSTPONED',
+    };
+    return map[short] || 'SCHEDULED';
+}
+
 // Helper functions
 function getSportCountry(sportKey: string, lang: string = 'en'): string {
     const map: Record<string, Record<string, string>> = {
@@ -222,6 +355,17 @@ function getSportLogo(sportKey: string): string {
         'soccer_france_ligue_one': 'https://media.api-sports.io/football/leagues/61.png',
     };
     return map[sportKey] || '';
+}
+
+function getApiSportsLeagueId(sportKey: string): number {
+    const map: Record<string, number> = {
+        'soccer_epl': 39,
+        'soccer_spain_la_liga': 140,
+        'soccer_germany_bundesliga': 78,
+        'soccer_italy_serie_a': 135,
+        'soccer_france_ligue_one': 61,
+    };
+    return map[sportKey] || 0;
 }
 
 function extractH2HOdds(event?: OddsEvent): { home: number; draw: number; away: number } | null {
