@@ -42,9 +42,15 @@ export default function LiveTicker({ lang, t }: { lang: string, t: any }) {
                     }));
                     setMatches(liveMatches);
                     setIsLive(true);
+                } else {
+                    // If no live matches, show featured/upcoming matches from mock
+                    setMatches(mockLiveMatches.map(m => ({ ...m, status: 'SCHEDULED' as const, time: 'Featured' })));
+                    setIsLive(false);
                 }
             } catch (err) {
                 console.warn('Failed to fetch live scores, using mock data');
+                setMatches(mockLiveMatches.map(m => ({ ...m, status: 'SCHEDULED' as const, time: 'Featured' })));
+                setIsLive(false);
             }
         };
 
@@ -77,10 +83,11 @@ export default function LiveTicker({ lang, t }: { lang: string, t: any }) {
                     <div key={i} className="flex items-center gap-6 group/item cursor-default transition-all duration-300">
                         <div className="flex items-center gap-3">
                             <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border ${match.status === 'LIVE' ? 'bg-red-600/10 border-red-500/50 text-red-500 animate-pulse' :
-                                match.status === 'HALFTIME' ? 'bg-amber-500/10 border-amber-500/50 text-amber-500' :
-                                    'bg-slate-800 border-slate-700 text-slate-400'
+                                    match.status === 'HALFTIME' ? 'bg-amber-500/10 border-amber-500/50 text-amber-500' :
+                                        match.status === 'SCHEDULED' ? 'bg-blue-600/10 border-blue-500/50 text-blue-500' :
+                                            'bg-slate-800 border-slate-700 text-slate-400'
                                 }`}>
-                                {translateTime(match)}
+                                {match.status === 'SCHEDULED' ? 'Featured' : translateTime(match)}
                             </span>
                         </div>
 

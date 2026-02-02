@@ -67,51 +67,92 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             <LiveTicker lang={lang} t={t} />
 
             <div className="container mx-auto px-6 py-16 max-w-7xl">
-                {/* Hero Section */}
-                <section className="mb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-                    <div className="lg:col-span-7 text-center lg:ltr:text-left lg:rtl:text-right">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-[10px] font-black tracking-[0.2em] text-blue-600 uppercase bg-blue-50/50 dark:bg-blue-900/20 rounded-full border border-blue-100/50 dark:border-blue-800 animate-fade-in shadow-sm">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-                            </span>
-                            {t.hero.badge}
-                        </div>
-                        <h1 className="text-6xl lg:text-[6rem] font-black mb-10 leading-[0.9] tracking-[-0.04em] text-slate-900 dark:text-white animate-fade-up">
-                            {t.hero.title1} <br />
-                            <span className="gradient-text italic opacity-95">{t.hero.titleHighlight}</span> <br className="hidden xl:block" />
-                            {t.hero.title2}
-                        </h1>
-                        <p className="text-lg lg:text-xl text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed mb-12 font-medium animate-fade-up animation-delay-100">
-                            {t.hero.description}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-6 justify-center lg:ltr:justify-start lg:rtl:justify-end animate-fade-up animation-delay-200">
-                            <Link href={`/${lang}/predictions`} className="bg-blue-600 text-white px-10 py-5 rounded-[1.25rem] font-black uppercase tracking-widest text-xs hover:bg-blue-700 hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] transition-all active:scale-95 shadow-lg">
-                                {t.hero.startWinning}
-                            </Link>
-                            <Link href={`/${lang}/blog`} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-slate-100 dark:border-slate-800 px-10 py-5 rounded-[1.25rem] font-black uppercase tracking-widest text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95">
-                                {t.ui.viewAll}
-                            </Link>
-                        </div>
+                {/* Elite Hero Section */}
+                <section className="relative mb-32 rounded-[3.5rem] overflow-hidden">
+                    {/* Dynamic Background Elements */}
+                    <div className="absolute inset-0 bg-slate-950">
+                        <div className="absolute -top-1/4 -right-1/4 w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[160px] animate-pulse" />
+                        <div className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[140px] animate-pulse" style={{ animationDelay: '2s' }} />
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]" />
                     </div>
 
-                    <div className="lg:col-span-5 grid grid-cols-1 gap-8 animate-fade-in animation-delay-300">
-                        <div className="premium-card p-12 bg-slate-900 text-white border-none relative overflow-hidden group shadow-2xl">
-                            <div className="absolute -top-24 -right-24 w-80 h-80 bg-blue-600/30 rounded-full blur-[100px] group-hover:scale-125 transition-transform duration-1000" />
-                            <div className="relative z-10">
-                                <div className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-blue-400 opacity-80">{t.ui.accuracy}</div>
-                                <div className="text-8xl font-black mb-6 tracking-tighter italic">89.4<span className="text-blue-500">%</span></div>
-                                <p className="text-sm font-bold leading-relaxed text-slate-400 max-w-xs">{t.ui.aiAccuracyDesc}</p>
+                    <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-0">
+                        {/* Hero Content Left */}
+                        <div className="lg:col-span-7 p-12 lg:p-24 flex flex-col justify-center border-r border-white/5">
+                            <div className="inline-flex items-center gap-3 px-5 py-2.5 mb-10 text-[11px] font-black tracking-[0.3em] text-blue-400 uppercase bg-blue-500/10 rounded-2xl border border-blue-500/20 w-fit backdrop-blur-md animate-fade-in shadow-2xl">
+                                <span className="relative flex h-2.5 w-2.5">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
+                                </span>
+                                {t.hero.badge}
+                            </div>
+
+                            <h1 className="text-6xl lg:text-[7.5rem] font-black mb-12 leading-[0.85] tracking-[-0.06em] text-white animate-fade-up">
+                                {t.hero.title1} <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-600 to-indigo-400 italic font-black">{t.hero.titleHighlight}</span> <br className="hidden xl:block" />
+                                {t.hero.title2}
+                            </h1>
+
+                            <p className="text-xl lg:text-2xl text-slate-400 max-w-2xl leading-relaxed mb-16 font-medium animate-fade-up animation-delay-100">
+                                {t.hero.description}
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-8 animate-fade-up animation-delay-200">
+                                <Link href={`/${lang}/predictions`} className="group relative overflow-hidden bg-blue-600 text-white px-12 py-6 rounded-2xl font-black uppercase tracking-widest text-sm transition-all hover:scale-105 active:scale-95 shadow-[0_20px_50px_rgba(37,99,235,0.3)]">
+                                    <span className="relative z-10">{t.hero.startWinning}</span>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                                </Link>
+                                <Link href={`/${lang}/blog`} className="bg-white/5 backdrop-blur-md text-white border border-white/10 px-12 py-6 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-white/10 transition-all active:scale-95">
+                                    {t.ui.viewAll}
+                                </Link>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-8">
-                            <div className="premium-card p-8 bg-blue-600 text-white border-none flex flex-col justify-between aspect-square shadow-xl shadow-blue-500/20 group">
-                                <Crown className="w-8 h-8 opacity-20 group-hover:rotate-12 transition-transform" />
-                                <div className="text-4xl font-black italic uppercase leading-none mt-4">TOP<br />PICK</div>
+
+                        {/* Hero Stats Right */}
+                        <div className="lg:col-span-5 bg-white/2 px-12 py-24 backdrop-blur-3xl flex flex-col justify-between">
+                            <div className="space-y-12">
+                                {/* API Status Indicator */}
+                                <div className="p-8 rounded-[2.5rem] bg-slate-900/50 border border-white/5 backdrop-blur-xl group hover:border-blue-500/30 transition-all duration-500">
+                                    <div className="flex items-center justify-between mb-8">
+                                        <div className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em]">API Connectivity</div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.5)]" />
+                                            <span className="text-[10px] font-black text-emerald-500 uppercase">Live</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-end justify-between">
+                                        <div>
+                                            <div className="text-5xl font-black text-white italic mb-2 tracking-tighter">API-Sports</div>
+                                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">High Fidelity Integration</div>
+                                        </div>
+                                        <div className="w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
+                                            <Activity className="w-8 h-8 text-blue-500 animate-pulse" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Precision Stat */}
+                                <div className="p-10 rounded-[2.5rem] bg-indigo-600 shadow-[0_32px_64px_-16px_rgba(79,70,229,0.3)] group hover:-translate-y-2 transition-all duration-500">
+                                    <div className="flex items-center justify-between mb-8">
+                                        <Crown className="w-10 h-10 text-white/20 group-hover:rotate-12 transition-transform duration-500" />
+                                        <div className="text-[10px] font-black text-white/50 uppercase tracking-widest">{t.ui.accuracy}</div>
+                                    </div>
+                                    <div className="text-8xl font-black text-white italic tracking-[-0.08em] leading-none mb-4">
+                                        89.4<span className="text-indigo-200">%</span>
+                                    </div>
+                                    <p className="text-xs font-bold text-indigo-100/60 leading-relaxed uppercase tracking-widest">{t.ui.aiAccuracyDesc}</p>
+                                </div>
                             </div>
-                            <div className="premium-card p-8 bg-white dark:bg-slate-900 flex flex-col justify-between aspect-square shadow-lg group">
-                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Experts</div>
-                                <div className="text-5xl font-black text-slate-900 dark:text-white group-hover:scale-110 transition-transform">50+</div>
+
+                            <div className="mt-12 pt-12 border-t border-white/5 grid grid-cols-2 gap-8">
+                                <div>
+                                    <div className="text-4xl font-black text-white italic mb-1">50+</div>
+                                    <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Active Experts</div>
+                                </div>
+                                <div>
+                                    <div className="text-4xl font-black text-white italic mb-1">24/7</div>
+                                    <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Match Tracking</div>
+                                </div>
                             </div>
                         </div>
                     </div>
